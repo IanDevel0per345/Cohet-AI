@@ -4,11 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import type { User } from '@supabase/supabase-js'
-import {
-  IconLink as Link2,
-  IconLogout as LogOut,
-  IconUserCircle as UserRound
-} from '@tabler/icons-react'
+import { IconLink as Link2, IconLogout as LogOut, IconUserCircle as UserRound } from '@tabler/icons-react'
+import { ChevronsUpDown } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/client'
 
@@ -32,9 +29,20 @@ import { ExternalLinkItems } from './external-link-items'
 
 interface UserMenuProps {
   user: User
+  /**
+   * When true, renders the prompt's demo user row: avatar/initials, name, email
+   * and a chevron, full-width inside the sidebar footer (instead of the small
+   * circular avatar button used in the header).
+   */
+  compact?: boolean
+  name?: string
+  avatarUrl?: string | null
 }
 
-export default function UserMenu({ user }: UserMenuProps) {
+export default function UserMenu({
+  user,
+  ...props
+}: UserMenuProps) {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
@@ -69,19 +77,44 @@ export default function UserMenu({ user }: UserMenuProps) {
     window.setTimeout(() => setAccountOpen(true), 0)
   }
 
+  const displayName = (props.name ?? '').trim() || userName
+  const displayAvatar = props.avatarUrl ?? avatarUrl
+
+  const userRow = (
+    <DropdownMenuTrigger asChild>
+      {props.compact ? (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-5 w-5 rounded-md">
+            <AvatarImage src={displayAvatar} alt={displayName} />
+            <AvatarFallback>
+              {getInitials(displayName, user.email)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-medium">{displayName}</span>
+            <span className="text-xs text-muted-foreground">
+              {user.email}
+            </span>
+          </div>
+          <ChevronsUpDown className="ml-auto h-5 w-5 rounded-md" />
+        </div>
+      ) : (
+        <Button variant="ghost" className="relative size-6 rounded-full">
+          <Avatar className="size-6">
+            <AvatarImage src={displayAvatar} alt={displayName} />
+            <AvatarFallback>
+              {getInitials(displayName, user.email)}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      )}
+    </DropdownMenuTrigger>
+  )
+
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative size-6 rounded-full">
-            <Avatar className="size-6">
-              <AvatarImage src={avatarUrl} alt={userName} />
-              <AvatarFallback>
-                {getInitials(userName, user.email)}
-              </AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
+        {userRow}
         <DropdownMenuContent className="w-60" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">

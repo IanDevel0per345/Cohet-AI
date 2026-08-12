@@ -1,6 +1,6 @@
-# Contributing to Morphic
+# Contributing to Cohet AI
 
-Thank you for your interest in contributing to Morphic! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Cohet AI! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -10,7 +10,7 @@ By participating in this project, you are expected to uphold our [Code of Conduc
 
 ### Reporting Issues
 
-- Check if the issue already exists in our [GitHub Issues](https://github.com/miurla/morphic/issues)
+- Check if the issue already exists in our [GitHub Issues](https://github.com/miurla/cohet/issues)
 - Use the issue templates when creating a new issue
 - Provide as much context as possible
 

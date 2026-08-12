@@ -13,7 +13,7 @@ import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 const externalLinks = [
   {
     name: 'X',
-    href: 'https://x.com/morphic_ai',
+    href: 'https://x.com/cohet_ai',
     icon: <SiX className="size-4" />
   },
   {
@@ -23,7 +23,7 @@ const externalLinks = [
   },
   {
     name: 'GitHub',
-    href: 'https://git.new/morphic',
+    href: 'https://git.new/cohet',
     icon: <SiGithub className="size-4" />
   }
 ]
