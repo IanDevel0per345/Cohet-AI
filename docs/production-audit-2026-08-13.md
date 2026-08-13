@@ -40,3 +40,23 @@ A tela de login carregou corretamente com Google, e-mail, senha, Forgot password
 URL: https://cohet-ai.vercel.app/auth/sign-up?audit=all-pages
 
 A tela de cadastro carregou corretamente com e-mail, senha, confirmação de senha, Sign Up, Sign In e Back to Home. Não foi criada nenhuma conta durante a auditoria.
+
+## Verificação final após a correção do Header
+
+A correção local foi aplicada ao Header com `pl-14` no mobile e `md:pl-3` no desktop, liberando a área do botão Sidebar antes do grupo Feedback/Library/usuário.
+
+O build passou com ESLint, TypeScript e Next build. O deployment de produção foi criado com target production e ficou READY.
+
+Na produção, a página inicial carregou sem erro e o botão Feedback abriu corretamente o modal "Give feedback" com opções de sentimento, textarea Your feedback, Cancel, Submit e Close. Não houve submissão de feedback real.
+
+O overlay de marcação mostrado nas capturas é da ferramenta de inspeção do navegador e não integra a interface pública.
+
+## Falha encontrada: rota dinâmica de busca
+
+URL testada: https://cohet-ai.vercel.app/search/test?audit=all-pages
+
+A rota retornou a tela de erro do Vercel: "This page couldn’t load — A server error occurred. Reload to try again. ERROR 3231780244". Isso indica uma falha de runtime ao carregar uma conversa/ID inexistente ou sem sessão e deve ser corrigido para retornar uma tela de conversa não encontrada, redirecionamento seguro ou estado vazio — nunca erro 500.
+
+## Recuperação de senha
+
+A rota `/auth/forgot-password` carregou corretamente com campo de e-mail e ação Send reset email.
