@@ -21,8 +21,8 @@ import {
 
 import { ChatHistorySection } from './sidebar/chat-history-section'
 import { ChatHistorySkeleton } from './sidebar/chat-history-skeleton'
-import { NewChatMenuItem } from './sidebar/new-chat-menu-item'
 import SidebarFooterCard from './sidebar/sidebar-footer-card'
+import { SidebarNavigation } from './sidebar/sidebar-navigation'
 
 /**
  * Main application sidebar, fully redesigned per the prompt's demo:
@@ -43,11 +43,9 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="flex flex-col px-2 py-4 h-full">
         <SidebarGroup>
-          <SidebarGroupLabel>Search</SidebarGroupLabel>
+          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              <NewChatMenuItem />
-            </SidebarMenu>
+            <SidebarNavigation />
           </SidebarGroupContent>
         </SidebarGroup>
         <div className="flex-1 overflow-y-auto">
