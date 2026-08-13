@@ -605,7 +605,7 @@ export function ChatPanel({
 
         <PromptInput
           className={cn(
-            'relative',
+            'relative mx-auto',
             isInputFocused &&
               'ring-1 ring-ring/20 ring-offset-1 ring-offset-background/50'
           )}
