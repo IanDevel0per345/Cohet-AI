@@ -2,12 +2,19 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { createServerClient } from '@supabase/ssr'
 
-import { getSupabasePublishableKey } from './keys'
+import { getSupabasePublishableKey, hasSupabasePublicConfig } from './keys'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request
   })
+
+  // If Supabase is not properly configured (e.g. placeholder values still set),
+  // skip the auth check — an uncaught failure here makes every route a 500.
+  if (!hasSupabasePublicConfig()) {
+    return supabaseResponse
+  }
+
   const supabaseKey = getSupabasePublishableKey()
 
   const supabase = createServerClient(
