@@ -150,10 +150,6 @@ function DataModelSelector({ data, className }: { data: ModelSelectorData; class
 
   const selectedModel = selectableByKey[selectedModelKey]
 
-  if (!data.enabled) {
-    return null
-  }
-
   if (!data.hasAvailableModels) {
     return (
       <Button
@@ -247,7 +243,7 @@ function DataModelSelector({ data, className }: { data: ModelSelectorData; class
 }
 
 export function ModelSelectorClient({ data, className }: ModelSelectorClientProps) {
-  if (!data) {
+  if (!data || !data.enabled) {
     return <FallbackModelSelector className={className} />
   }
 
