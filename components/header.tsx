@@ -5,11 +5,11 @@ import React, { useState } from 'react'
 import { usePathname } from 'next/navigation'
 
 import { User } from '@supabase/supabase-js'
-import { IconLibrary as LibraryIcon } from '@tabler/icons-react'
 
 import { captureClient } from '@/lib/analytics/posthog-client'
 import { cn } from '@/lib/utils'
 
+import { IconScoutIcon } from '@/components/ui/iconscout-icon'
 import { useSidebar } from '@/components/ui/sidebar'
 
 import { useLibrary } from './library/library-context'
@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
                 )
               }}
             >
-              <LibraryIcon className="size-4" />
+              <IconScoutIcon name="library" className="size-4" />
               Library
             </Button>
           )}

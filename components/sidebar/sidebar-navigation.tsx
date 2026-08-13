@@ -3,14 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import {
-  IconCalendar,
-  IconLibrary,
-  IconSearch
-} from '@tabler/icons-react'
-
 import { captureClient } from '@/lib/analytics/posthog-client'
 
+import { IconScoutIcon } from '@/components/ui/iconscout-icon'
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -22,8 +17,8 @@ import { useLibrary } from '@/components/library/library-context'
 import { NewChatMenuItem } from './new-chat-menu-item'
 
 const navigationItems = [
-  { href: '/search', label: 'Search', icon: IconSearch },
-  { href: '/calendar', label: 'Calendar', icon: IconCalendar }
+  { href: '/search', label: 'Search', icon: 'search' as const },
+  { href: '/calendar', label: 'Calendar', icon: 'calendar' as const }
 ]
 
 export function SidebarNavigation() {
@@ -34,7 +29,6 @@ export function SidebarNavigation() {
     <SidebarMenu>
       <NewChatMenuItem />
       {navigationItems.map(item => {
-        const Icon = item.icon
         const active =
           pathname === item.href || pathname.startsWith(`${item.href}/`)
 
@@ -42,7 +36,7 @@ export function SidebarNavigation() {
           <SidebarMenuItem key={item.href}>
             <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
               <Link href={item.href} className="flex items-center gap-2">
-                <Icon className="size-4" />
+                <IconScoutIcon name={item.icon} className="size-4" />
                 <span>{item.label}</span>
               </Link>
             </SidebarMenuButton>
@@ -58,7 +52,7 @@ export function SidebarNavigation() {
             captureClient('library_opened', { source: 'sidebar' })
           }}
         >
-          <IconLibrary className="size-4" />
+          <IconScoutIcon name="library" className="size-4" />
           <span>Library</span>
         </SidebarMenuButton>
       </SidebarMenuItem>

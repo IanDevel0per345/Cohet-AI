@@ -6,6 +6,7 @@ import { useCallback,useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { ConnectionsMenu } from "./connections-menu";
+import { IconScoutIcon } from "./iconscout-icon";
 
 // ----------------------------------------------------------------------
 // Transition Physics
@@ -79,11 +80,7 @@ function ModelIcon({ model, className }: { model: string; className?: string }) 
 }
 
 function ArrowUpIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M7 12V2M7 2L2.5 6.5M7 2L11.5 6.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <IconScoutIcon name="new" className="size-4 brightness-0 invert" />;
 }
 
 function MicIcon() {
@@ -104,19 +101,11 @@ function StopIcon() {
 }
 
 function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M7 2.5V11.5M2.5 7H11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
+  return <IconScoutIcon name="add" className="size-[18px]" />;
 }
 
 function CloseIcon() {
-  return (
-    <svg width="9" height="9" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M2.5 2.5L11.5 11.5M11.5 2.5L2.5 11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
+  return <IconScoutIcon name="close" className="size-3" />;
 }
 
 function DynamicBarsIcon({ level }: { level: string }) {
