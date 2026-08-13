@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
       >
         <div
           className={cn(
-            'flex items-center gap-2 transition-[margin] duration-200 ease-linear',
+            'ml-14 flex items-center gap-2 transition-[margin] duration-200 ease-linear',
             open
               ? 'md:ml-[calc(var(--sidebar-width)+0.5rem)]'
               : 'md:ml-2'
