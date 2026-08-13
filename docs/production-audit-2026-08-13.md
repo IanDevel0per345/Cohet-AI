@@ -1,66 +1,62 @@
-# Auditoria de produção — 2026-08-13
+# Auditoria de produção — Cohet AI
 
-## Página inicial
-URL: https://cohet-ai.vercel.app/?audit=feedback
+**Data:** 13 de agosto de 2026
+**Domínio auditado:** https://cohet-ai.vercel.app
+**Commit de correção final:** `0fa6937`
+**Deployment de validação:** `dpl_DWnedap8BEfKfjwTsYyGSeHaEbYK`
 
-A página inicial carregou sem erro visível. O Header apresenta Feedback e Open menu. O composer aparece com Ask anything... e botão de voz; o seletor GPT 5.5 aparece dentro do Input Chat somente quando o composer é expandido, conforme a reversão solicitada.
+## Resumo executivo
 
-## Calendar
-URL: https://cohet-ai.vercel.app/calendar?audit=all-pages
+A aplicação está carregando no domínio principal sem erro global visível. A correção da rota dinâmica de busca foi publicada e validada: `/search/test` agora redireciona para `/`, em vez de exibir a tela de erro 500 do Vercel. O composer também está no estado solicitado: inicialmente compacto e, ao ser expandido, mostra o seletor de modelo e o controle de esforço dentro do próprio input.
 
-A rota carregou sem erro. Há botão Today, navegação para mês anterior e próximo, grade mensal de agosto de 2026 e campo Add an event.... O evento persistido "Revisar briefing do projeto" aparece no estado público da página. A rota ainda exibe o rótulo Workspace no cabeçalho da página, que pode ser avaliado como elemento visual separado do Sidebar.
+A auditoria ainda identificou duas diferenças importantes entre o estado atual e o requisito amplo de navegação: `/library` não é uma página independente e retorna 404, embora a Library exista como painel contextual dentro da aplicação autenticada; além disso, a aplicação ainda utiliza vários ícones Tabler/Lucide em componentes internos, portanto a substituição por Iconscout não é literalmente global em todo o código.
 
-## Observações
-As capturas mostram uma camada de inspeção visual do navegador nos elementos interativos; isso não faz parte da interface do site.
+## Matriz de rotas públicas
 
-Fontes consultadas:
-- https://cohet-ai.vercel.app/?audit=feedback
-- https://cohet-ai.vercel.app/calendar?audit=all-pages
+| Área | URL testada | Resultado | Observação |
+|---|---|---:|---|
+| Homepage | `/` | **OK** | Carrega o cabeçalho, Feedback, menu, composer e modelos. |
+| Search sem query | `/search` | **Seguro** | Redireciona para `/`, conforme a implementação esperada para ausência de `q`. |
+| Search inválido | `/search/test` | **Corrigido** | Redireciona para `/`; não reproduziu mais o erro 500. |
+| Search com query | `/search?q=...` | **Implementado** | Cria uma conversa e renderiza o Chat com o texto de consulta. Não foi submetida consulta real durante a auditoria. |
+| Search dinâmico válido | `/search/[id]` | **Blindado** | IDs curtos/inválidos são descartados antes do acesso ao banco; falhas de sessão e carregamento são tratadas com redirecionamento seguro. |
+| Calendar | `/calendar` | **OK** | Exibe agosto de 2026, Today, navegação mensal, eventos e campo de inclusão. O evento local persistido apareceu na tela. |
+| Library | `/library` | **Lacuna** | Retorna 404. A Library atual é um painel contextual aberto pelo Header/sidebar quando há sessão autenticada, não uma rota independente. |
+| Login | `/auth/login` | **OK** | Google, e-mail, senha, recuperação, cadastro e retorno à home visíveis. Nenhuma credencial foi submetida. |
+| Cadastro | `/auth/sign-up` | **OK** | E-mail, senha, confirmação, cadastro, login e retorno à home visíveis. Nenhuma conta foi criada. |
+| Recuperação | `/auth/forgot-password` | **OK** | Campo de e-mail e ação de envio carregam corretamente. Nenhum e-mail foi enviado. |
 
-Registro salvo para continuidade da auditoria.
+## Composer e preferência revertida
 
-## Search
-URL testada: https://cohet-ai.vercel.app/search?audit=all-pages
+Na homepage, o composer compacto mostra `Ask anything...` e o botão de voz. Após a expansão, foram observados `GPT 5.5`, o seletor de modelo e `Medium` dentro do próprio composer. Isso confirma a reversão solicitada: o seletor não está em um card separado no cabeçalho.
 
-A rota não possui uma página Search dedicada; o acesso redireciona para a página inicial `/`. Isso evita 404, mas o item Search do Sidebar não leva a uma tela própria de busca.
+Os modelos exibidos no estado expandido incluem GPT 5.5, Opus 4.8, Gemini 3.5 Flash, Composer 2.5 e GLM 5.2. Não foi executado envio de mensagem ou troca persistida de modelo durante a auditoria.
 
-## Library
-URL testada: https://cohet-ai.vercel.app/library?audit=all-pages
+## Sidebar, Header e responsividade
 
-A rota retorna 404. A implementação atual da Library funciona como painel contextual dentro da aplicação, mas não existe uma rota `/library` independente. Isso precisa ser considerado uma lacuna funcional se o item do Sidebar estiver sendo apresentado como navegação para uma página.
+A sidebar autenticada contém New, Search, Calendar e Library. Search aponta para `/search`, Calendar para `/calendar`, New usa o fluxo de nova conversa e Library abre o contexto local da biblioteca. Na visualização não autenticada, a sidebar autenticada não é montada; o botão `Open menu` disponível no Header abre o menu de visitante com Sign In, Theme e Links.
 
-## Autenticação
+A homepage visualizada em viewport de desktop não apresentou sobreposição entre Feedback e o trigger do menu. A correção de espaçamento responsivo do Header permanece no código. Não foi possível simular uma sessão autenticada real nem redimensionar o viewport do navegador de auditoria para uma validação pixel-perfect de todos os breakpoints; recomenda-se uma checagem manual final em largura móvel logada.
 
-### Login
-URL: https://cohet-ai.vercel.app/auth/login?audit=all-pages
+## Ícones e fontes
 
-A tela de login carregou corretamente com Google, e-mail, senha, Forgot password?, Sign In, Sign Up e Back to Home. Não foi submetido nenhum formulário real.
+Os ícones oficiais Iconscout estão visíveis no Header, nos controles principais e na navegação autenticada por meio do componente compartilhado `IconScoutIcon`, com filtro de contraste para o tema escuro. A implementação, porém, ainda contém usos de `@tabler/icons-react` e `lucide-react` em diversos componentes internos, incluindo ações de mensagem, upload, feedback, menus e controles de pesquisa. Portanto, a afirmação correta é que os ícones globais prioritários foram migrados para Iconscout; a exigência de substituir **todos** os ícones do site ainda não está integralmente satisfeita.
 
-### Cadastro
-URL: https://cohet-ai.vercel.app/auth/sign-up?audit=all-pages
+A fonte principal da aplicação é local (`app/fonts/inter.woff2`). Não foram encontradas referências de `next/font/google` ou `fonts.googleapis.com` no código-fonte da aplicação.
 
-A tela de cadastro carregou corretamente com e-mail, senha, confirmação de senha, Sign Up, Sign In e Back to Home. Não foi criada nenhuma conta durante a auditoria.
+## Estabilidade e deployment
 
-## Verificação final após a correção do Header
+O build local passou por ESLint e TypeScript antes do commit `0fa6937`. O deployment de produção foi criado com target `production`, atingiu estado READY e o domínio principal passou a redirecionar `/search/test` para a home. A blindagem foi aplicada em `app/search/[id]/page.tsx`: IDs inválidos são rejeitados cedo, a leitura de sessão é protegida e o carregamento do chat possui tratamento de exceção.
 
-A correção local foi aplicada ao Header com `pl-14` no mobile e `md:pl-3` no desktop, liberando a área do botão Sidebar antes do grupo Feedback/Library/usuário.
+## Conclusão
 
-O build passou com ESLint, TypeScript e Next build. O deployment de produção foi criado com target production e ficou READY.
+O estado público atual é **estável para as rotas principais auditadas**, e o problema crítico do erro 500 em Search foi resolvido no domínio principal. O composer está conforme a preferência revertida. As pendências não bloqueantes são a ausência de uma rota independente para `/library`, a validação autenticada/mobile em uma sessão real e a migração completa dos ícones internos restantes para os assets oficiais Iconscout.
 
-Na produção, a página inicial carregou sem erro e o botão Feedback abriu corretamente o modal "Give feedback" com opções de sentimento, textarea Your feedback, Cancel, Submit e Close. Não houve submissão de feedback real.
+## Referências
 
-O overlay de marcação mostrado nas capturas é da ferramenta de inspeção do navegador e não integra a interface pública.
-
-## Falha encontrada: rota dinâmica de busca
-
-URL testada: https://cohet-ai.vercel.app/search/test?audit=all-pages
-
-A rota retornou a tela de erro do Vercel: "This page couldn’t load — A server error occurred. Reload to try again. ERROR 3231780244". Isso indica uma falha de runtime ao carregar uma conversa/ID inexistente ou sem sessão e deve ser corrigido para retornar uma tela de conversa não encontrada, redirecionamento seguro ou estado vazio — nunca erro 500.
-
-## Recuperação de senha
-
-A rota `/auth/forgot-password` carregou corretamente com campo de e-mail e ação Send reset email.
-
-## Atualização pós-correção
-
-O deployment `dpl_3xFk1o8au5XopghkoH9mnsTGXSAd` foi criado a partir do commit `d65cd19`, mas a API da Vercel informou `deployment_not_ready` ao tentar associar `cohet-ai.vercel.app` enquanto o estado ainda era BUILDING/QUEUED. O deployment expõe os aliases `cohet-ai-ian05519375s-projects.vercel.app` e `cohet-ai-git-main-ian05519375s-projects.vercel.app`; o domínio customizado `cohet-ai.vercel.app` continuou retornando o erro 500 na rota `/search/test`. A correção precisa ser validada após o deployment estar READY e explicitamente associado ao domínio principal.
+[1]: https://cohet-ai.vercel.app "Cohet AI — domínio de produção"
+[2]: https://cohet-ai.vercel.app/calendar "Cohet AI — Calendar"
+[3]: https://cohet-ai.vercel.app/auth/login "Cohet AI — Login"
+[4]: https://cohet-ai.vercel.app/auth/sign-up "Cohet AI — Cadastro"
+[5]: https://cohet-ai.vercel.app/auth/forgot-password "Cohet AI — Recuperação de senha"
+[6]: https://github.com/IanDevel0per345/Cohet-AI "Repositório Cohet AI"
