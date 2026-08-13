@@ -43,7 +43,7 @@ export function IconScoutIcon({
       width={24}
       height={24}
       aria-hidden={alt ? undefined : true}
-      className={cn("object-contain", className)}
+      className={cn("object-contain brightness-0 invert", className)}
       unoptimized
     />
   );
