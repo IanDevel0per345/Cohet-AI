@@ -60,9 +60,10 @@ function ProviderLogo({ providerId }: { providerId: string }) {
 
 interface ModelSelectorClientProps {
   data: ModelSelectorData
+  className?: string
 }
 
-export function ModelSelectorClient({ data }: ModelSelectorClientProps) {
+export function ModelSelectorClient({ data, className }: ModelSelectorClientProps) {
   const [open, setOpen] = useState(false)
   const [selectedModelKey, setSelectedModelKey] = useState<string>(
     data.selectedModelKey
@@ -121,10 +122,10 @@ export function ModelSelectorClient({ data }: ModelSelectorClientProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="h-auto gap-1 rounded-full border-none bg-muted px-3 py-2 text-sm shadow-none transition-[background-color,color,box-shadow,transform]"
+          className={cn('h-auto gap-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-sm transition-[background-color,color,box-shadow,transform] hover:bg-muted', className)}
         >
           <ProviderLogo providerId={selectedModel.providerId} />
-          <span className="truncate max-w-40 text-xs font-medium">
+          <span className="truncate max-w-52 text-sm font-semibold">
             {selectedModel.name}
           </span>
           <ChevronDown

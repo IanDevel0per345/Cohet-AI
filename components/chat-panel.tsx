@@ -47,6 +47,7 @@ import {
   TooltipTrigger
 } from './ui/tooltip'
 import { MessageNavigationDots } from './message-navigation-dots'
+import { ModelSelectorClient } from './model-selector-client'
 import { SearchModeSelector } from './search-mode-selector'
 import { UploadedFileList } from './uploaded-file-list'
 
@@ -603,6 +604,14 @@ export function ChatPanel({
           </div>
         )}
 
+        {modelSelectorData?.enabled && (
+          <div className="mb-3 flex w-full justify-center">
+            <ModelSelectorClient
+              data={modelSelectorData}
+              className="min-w-[220px] justify-between"
+            />
+          </div>
+        )}
         <PromptInput
           className={cn(
             'relative mx-auto',
@@ -625,7 +634,7 @@ export function ChatPanel({
             }
             requestAnimationFrame(() => promptFormRef.current?.requestSubmit())
           }}
-          models={['GPT 5.5', 'Opus 4.8', 'Gemini 3.5 Flash', 'Composer 2.5', 'GLM 5.2']}
+          model={modelSelectorData?.selectedModelKey?.split(':').pop() ?? 'GPT 5.5'}
           onPlusClick={() => {
             if (!isGuest) setIsAttachmentMenuOpen(open => !open)
           }}
