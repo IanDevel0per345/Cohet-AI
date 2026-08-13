@@ -11,6 +11,8 @@ import { Chat } from '@/components/chat'
 export const maxDuration = 60
 
 async function safelyLoadChat(id: string, userId?: string) {
+  if (!id || id.length < 10) return null
+
   try {
     return await loadChat(id, userId)
   } catch (error) {
@@ -19,11 +21,20 @@ async function safelyLoadChat(id: string, userId?: string) {
   }
 }
 
+async function safelyGetCurrentUserId() {
+  try {
+    return await getCurrentUserId()
+  } catch (error) {
+    console.error('[SearchPage] Failed to load session:', error)
+    return undefined
+  }
+}
+
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await props.params
-  const userId = await getCurrentUserId()
+  const userId = await safelyGetCurrentUserId()
 
   const chat = await safelyLoadChat(id, userId)
 
@@ -40,7 +51,7 @@ export default async function SearchPage(props: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await props.params
-  const userId = await getCurrentUserId()
+  const userId = await safelyGetCurrentUserId()
 
   const chat = await safelyLoadChat(id, userId)
 

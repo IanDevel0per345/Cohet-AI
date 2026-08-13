@@ -60,3 +60,7 @@ A rota retornou a tela de erro do Vercel: "This page couldn’t load — A serve
 ## Recuperação de senha
 
 A rota `/auth/forgot-password` carregou corretamente com campo de e-mail e ação Send reset email.
+
+## Atualização pós-correção
+
+O deployment `dpl_3xFk1o8au5XopghkoH9mnsTGXSAd` foi criado a partir do commit `d65cd19`, mas a API da Vercel informou `deployment_not_ready` ao tentar associar `cohet-ai.vercel.app` enquanto o estado ainda era BUILDING/QUEUED. O deployment expõe os aliases `cohet-ai-ian05519375s-projects.vercel.app` e `cohet-ai-git-main-ian05519375s-projects.vercel.app`; o domínio customizado `cohet-ai.vercel.app` continuou retornando o erro 500 na rota `/search/test`. A correção precisa ser validada após o deployment estar READY e explicitamente associado ao domínio principal.
