@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+import type { SetAllCookies } from '@supabase/ssr'
 import { createServerClient } from '@supabase/ssr'
 
 import { getSupabasePublishableKey, hasSupabasePublicConfig } from './keys'
@@ -25,7 +26,7 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: Parameters<SetAllCookies>[0]) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )

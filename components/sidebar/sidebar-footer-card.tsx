@@ -14,11 +14,7 @@ import {
   InfoCardFooter,
   InfoCardMedia,
   InfoCardTitle} from '@/components/ui/info-card'
-import {
-  SidebarGroup,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem} from '@/components/ui/sidebar'
+import { SidebarGroup } from '@/components/ui/sidebar'
 
 import UserMenu from '@/components/user-menu'
 
@@ -75,23 +71,12 @@ export default function SidebarFooterCard({ user }: { user: User }) {
         </InfoCardContent>
       </InfoCard>
       <SidebarGroup className="p-0">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="w-full justify-between gap-3 h-12"
-              asChild
-            >
-              <div>
-                <UserMenu
-                  user={user}
-                  compact
-                  name={userName}
-                  avatarUrl={avatarUrl}
-                />
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <UserMenu
+          user={user}
+          compact
+          name={userName}
+          avatarUrl={avatarUrl}
+        />
       </SidebarGroup>
     </div>
   )

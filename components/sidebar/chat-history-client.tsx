@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 
-import { toast } from 'sonner'
-
 import { Chat as DBChat } from '@/lib/db/schema'
 
 import {
@@ -41,8 +39,8 @@ export function ChatHistoryClient() {
       setChats(dbChats)
       setNextOffset(newNextOffset)
     } catch (error) {
-      console.error('Failed to load initial chats:', error)
-      toast.error('Failed to load chat history.')
+      console.warn('Chat history unavailable:', error)
+      setChats([])
       setNextOffset(null)
     } finally {
       setIsLoading(false)
@@ -50,6 +48,8 @@ export function ChatHistoryClient() {
   }, [])
 
   useEffect(() => {
+    // The initial request synchronizes the client with the server-backed history.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInitialChats()
   }, [fetchInitialChats])
 
@@ -80,8 +80,7 @@ export function ChatHistoryClient() {
       setChats(prevChats => [...prevChats, ...dbChats])
       setNextOffset(newNextOffset)
     } catch (error) {
-      console.error('Failed to load more chats:', error)
-      toast.error('Failed to load more chat history.')
+      console.warn('More chat history unavailable:', error)
       setNextOffset(null)
     } finally {
       setIsLoading(false)

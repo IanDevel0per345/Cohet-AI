@@ -41,9 +41,8 @@ export default function AppSidebar() {
         </Link>
         <SidebarTrigger />
       </SidebarHeader>
-      <SidebarContent className="flex flex-col px-2 py-4 h-full">
-        <SidebarGroup>
-          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+      <SidebarContent className="flex flex-col px-0 py-1 h-full">
+        <SidebarGroup className="px-2 py-1">
           <SidebarGroupContent>
             <SidebarNavigation />
           </SidebarGroupContent>
@@ -54,7 +53,7 @@ export default function AppSidebar() {
           </Suspense>
         </div>
       </SidebarContent>
-      <SidebarFooter className="px-2 pb-4">
+      <SidebarFooter className="px-2 pb-3">
         <Suspense fallback={null}>
           <SidebarFooterCardWrapper />
         </Suspense>

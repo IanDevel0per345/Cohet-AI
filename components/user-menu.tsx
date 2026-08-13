@@ -83,7 +83,10 @@ export default function UserMenu({
   const userRow = (
     <DropdownMenuTrigger asChild>
       {props.compact ? (
-        <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          className="h-12 w-full justify-start gap-2 rounded-lg px-2 text-left"
+        >
           <Avatar className="h-5 w-5 rounded-md">
             <AvatarImage src={displayAvatar} alt={displayName} />
             <AvatarFallback>
@@ -97,7 +100,7 @@ export default function UserMenu({
             </span>
           </div>
           <ChevronsUpDown className="ml-auto h-5 w-5 rounded-md" />
-        </div>
+        </Button>
       ) : (
         <Button variant="ghost" className="relative size-6 rounded-full">
           <Avatar className="size-6">
