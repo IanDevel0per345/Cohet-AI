@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 
 import { UIMessage } from 'ai'
 
@@ -45,7 +45,7 @@ export default async function SearchPage(props: {
   const chat = await safelyLoadChat(id, userId)
 
   if (!chat) {
-    notFound()
+    redirect('/')
   }
 
   if (chat.visibility === 'private' && !userId) {
