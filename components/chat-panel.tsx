@@ -7,21 +7,12 @@ import {
   useState,
   useSyncExternalStore
 } from 'react'
-import Textarea from 'react-textarea-autosize'
 import { useRouter } from 'next/navigation'
 
 import { UseChatHelpers } from '@ai-sdk/react'
 import {
-  IconArrowsDiagonal as ArrowsDiagonal,
   IconArrowUp as ArrowUp,
-  IconChevronDown as ChevronDown,
-  IconFileText as FileText,
-  IconLibrary as LibraryIcon,
-  IconMessageCirclePlus as MessageCirclePlus,
-  IconPaperclip as Paperclip,
-  IconPlus as Plus,
-  IconSquare as Square,
-  IconX as X
+  IconChevronDown as ChevronDown
 } from '@tabler/icons-react'
 import { toast } from 'sonner'
 
@@ -44,10 +35,9 @@ import {
 import { stripMarkdownText } from '@/lib/utils/markdown'
 
 import { useArtifact } from './artifact/artifact-context'
-import { ActionSuggestions } from './chat/action-suggestions'
-import { RedesignedInput } from './chat/redesigned-input'
 import { useLibrary } from './library/library-context'
 import { LibraryPickerDialog } from './library/library-picker-dialog'
+import { PromptInput } from './ui/ai-chat-input'
 import { Button } from './ui/button'
 import { IconBlinkingLogo } from './ui/icons'
 import {
@@ -57,7 +47,6 @@ import {
   TooltipTrigger
 } from './ui/tooltip'
 import { MessageNavigationDots } from './message-navigation-dots'
-import { ModelSelectorClient } from './model-selector-client'
 import { SearchModeSelector } from './search-mode-selector'
 import { UploadedFileList } from './uploaded-file-list'
 
@@ -138,6 +127,7 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const router = useRouter()
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const promptFormRef = useRef<HTMLFormElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const attachmentMenuRef = useRef<HTMLDivElement>(null)
   const noteContextsRef = useRef(noteContexts)
@@ -613,437 +603,32 @@ export function ChatPanel({
           </div>
         )}
 
-        <RedesignedInput
+        <PromptInput
           className={cn(
             'relative',
             isInputFocused &&
               'ring-1 ring-ring/20 ring-offset-1 ring-offset-background/50'
           )}
           placeholder={messages.length > 0 ? 'Reply...' : 'Ask anything...'}
-          inputText={input}
-          contextChip={
-            noteContexts.length > 0
-              ? {
-                  icon: (
-                    <FileText className="size-3.5 shrink-0 opacity-60" />
-                  ),
-                  label:
-                    stripMarkdownText(
-                      noteContexts[noteContexts.length - 1].title
-                    ) || 'Untitled note',
-                  meta: 'Note'
-                }
-              : urlCards.length > 0
-                ? {
-                    icon: (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={`https://www.google.com/s2/favicons?domain=${(() => {
-                          try {
-                            return new URL(
-                              urlCards[urlCards.length - 1]
-                            ).host.replace(/^www\./, '')
-                          } catch {
-                            return ''
-                          }
-                        })()}&sz=32`}
-                        alt=""
-                        width={14}
-                        height={14}
-                        className="size-3.5 shrink-0 rounded-sm"
-                      />
-                    ),
-                    label: (() => {
-                      try {
-                        return new URL(urlCards[urlCards.length - 1]).host.replace(/^www\./, '')
-                      } catch {
-                        return urlCards[urlCards.length - 1]
-                      }
-                    })(),
-                    meta: 'Link'
-                  }
-                : null
+          value={input}
+          onChange={value =>
+            handleInputChange({
+              target: { value }
+            } as React.ChangeEvent<HTMLTextAreaElement>)
           }
-          textareaSlot={
-            <>
-              {contentCards.length > 0 && (
-                <div className="flex flex-col gap-1.5 pt-3">
-                  {contentCards.map((card, i) => (
-                    <div
-                      key={`cc-${i}`}
-                      className="relative rounded-xl border border-input bg-background px-3 py-2"
-                    >
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                          <FileText className="size-3.5 shrink-0" />
-                          Pasted content · {card.length.toLocaleString()} chars
-                        </span>
-                        <TooltipProvider delayDuration={200}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                aria-label="Expand to text"
-                                className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                onClick={() => {
-                                  captureClient('content_card_expanded', {
-                                    chars: card.length
-                                  })
-                                  setContentCards(prev =>
-                                    prev.filter((_, j) => j !== i)
-                                  )
-                                  handleInputChange({
-                                    target: {
-                                      value: input ? `${input}\n\n${card}` : card
-                                    }
-                                  } as React.ChangeEvent<HTMLTextAreaElement>)
-                                  inputRef.current?.focus()
-                                }}
-                              >
-                                <ArrowsDiagonal className="size-3.5" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent className="text-xs">
-                              Expand to text
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                      <p className="line-clamp-2 whitespace-pre-wrap break-words text-xs text-muted-foreground/80">
-                        {card}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {quotedContexts.length > 0 && (
-                <div className="flex flex-col gap-1.5 pt-3">
-                  {quotedContexts.map((card, i) => (
-                    <div
-                      key={`qc-${i}`}
-                      className="relative rounded-xl border border-input bg-background px-3 py-2"
-                    >
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                          <FileText className="size-3.5 shrink-0" />
-                          Quoted context · {card.length.toLocaleString()} chars
-                        </span>
-                        <button
-                          type="button"
-                          aria-label="Remove quoted context"
-                          className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                          onClick={() => {
-                            setQuotedContexts(prev =>
-                              prev.filter((_, j) => j !== i)
-                            )
-                          }}
-                        >
-                          <X className="size-3.5" />
-                        </button>
-                      </div>
-                      <p className="line-clamp-2 whitespace-pre-wrap break-words text-xs text-muted-foreground/80">
-                        {card}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {noteContexts.length > 0 && (
-                <div className="flex flex-col gap-1.5 pt-3">
-                  {noteContexts.map((note, i) => (
-                    <div
-                      key={note.id}
-                      className="relative rounded-xl border border-input bg-background px-3 py-2"
-                    >
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <span className="flex items-center gap-1.5 truncate text-xs font-medium text-muted-foreground">
-                          <FileText className="size-3.5 shrink-0" />
-                          <span className="truncate">
-                            Note: {stripMarkdownText(note.title) || 'Untitled note'}
-                          </span>
-                        </span>
-                        <button
-                          type="button"
-                          aria-label="Remove note"
-                          className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                          onClick={() => {
-                            setNoteContexts(prev =>
-                              prev.filter((_, j) => j !== i)
-                            )
-                          }}
-                        >
-                          <X className="size-3.5" />
-                        </button>
-                      </div>
-                      <p className="line-clamp-2 whitespace-pre-wrap break-words text-xs text-muted-foreground/80">
-                        {stripMarkdownText(note.content)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {urlCards.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-3">
-                  {urlCards.map((url, i) => {
-                    let host = url
-                    try {
-                      host = new URL(url).host.replace(/^www\./, '')
-                    } catch {}
-                    return (
-                      <span
-                        key={i}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background py-1 pl-2 pr-1 text-xs text-muted-foreground"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={`https://www.google.com/s2/favicons?domain=${host}&sz=32`}
-                          alt=""
-                          width={14}
-                          height={14}
-                          className="size-3.5 shrink-0 rounded-sm"
-                        />
-                        <span className="max-w-[180px] truncate">{host}</span>
-                        <button
-                          type="button"
-                          aria-label="Remove URL"
-                          className="shrink-0 rounded p-0.5 hover:bg-muted hover:text-foreground"
-                          onClick={() => {
-                            captureClient('url_card_removed')
-                            setUrlCards(prev => prev.filter((_, j) => j !== i))
-                          }}
-                        >
-                          <X className="size-3" />
-                        </button>
-                      </span>
-                    )
-                  })}
-                </div>
-              )}
-              <Textarea
-                ref={inputRef}
-                name="input"
-                rows={2}
-                maxRows={5}
-                tabIndex={0}
-                onCompositionStart={handleCompositionStart}
-                onCompositionEnd={handleCompositionEnd}
-                onFocus={() => setIsInputFocused(true)}
-                onBlur={() => setIsInputFocused(false)}
-                spellCheck={false}
-                value={input}
-                disabled={isLoading || isToolInvocationInProgress()}
-                className="resize-none w-full min-h-12 bg-transparent border-0 p-3 md:p-4 text-sm placeholder:text-muted-foreground focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
-                onChange={handleInputChange}
-                onPaste={e => {
-                  const text = e.clipboardData.getData('text')
-                  const trimmed = text.trim()
-                  // Only when the textarea is empty — a URL pasted mid-sentence
-                  // should stay inline, not get yanked into a chip.
-                  if (BARE_URL_RE.test(trimmed) && input.trim().length === 0) {
-                    e.preventDefault()
-                    setUrlCards(prev => [...prev, trimmed])
-                    captureClient('url_card_created')
-                    return
-                  }
-                  if (text.length >= PASTE_CARD_MIN_CHARS) {
-                    e.preventDefault()
-                    setContentCards(prev => [...prev, text])
-                    captureClient('content_card_created', {
-                      chars: text.length,
-                      lines: text.split('\n').length
-                    })
-                  }
-                }}
-                onKeyDown={e => {
-                  // e.nativeEvent.isComposing stays true on the keydown that
-                  // confirms an IME candidate, even after React-level
-                  // isComposing has flipped.
-                  if (
-                    e.key !== 'Enter' ||
-                    isComposing ||
-                    (e.nativeEvent as KeyboardEvent).isComposing ||
-                    enterDisabled
-                  ) {
-                    return
-                  }
-
-                  // Plain Enter (no modifiers) → submit
-                  if (!e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) {
-                    if (!hasPendingInput) {
-                      e.preventDefault()
-                      return
-                    }
-                    e.preventDefault()
-                    const textarea = e.target as HTMLTextAreaElement
-                    textarea.form?.requestSubmit()
-                    setIsInputFocused(false)
-                    textarea.blur()
-                    return
-                  }
-
-                  // Shift+Enter falls through to textarea default (inserts \n).
-                  // Alt/Option+Enter on macOS does NOT insert \n by default,
-                  // so insert it manually to match user expectation.
-                  if (e.altKey && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
-                    e.preventDefault()
-                    const textarea = e.target as HTMLTextAreaElement
-                    const start = textarea.selectionStart ?? input.length
-                    const end = textarea.selectionEnd ?? input.length
-                    const next = input.slice(0, start) + '\n' + input.slice(end)
-                    handleInputChange({
-                      target: { value: next }
-                    } as React.ChangeEvent<HTMLTextAreaElement>)
-                    requestAnimationFrame(() => {
-                      textarea.selectionStart = textarea.selectionEnd = start + 1
-                    })
-                  }
-                }}
-              />
-            </>
-          }
-          leftSlot={
-            <>
-              {!isGuest && (
-                <div ref={attachmentMenuRef} className="relative">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept={ALLOWED_FILE_TYPES.join(',')}
-                    className="hidden"
-                    onChange={event => {
-                      const files = Array.from(event.target.files ?? [])
-                      event.target.value = ''
-                      setIsAttachmentMenuOpen(false)
-                      void uploadSelectedFiles(files)
-                    }}
-                  />
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className="size-8 rounded-full border-border/60 bg-transparent shadow-none"
-                          aria-label="Add"
-                          aria-expanded={isAttachmentMenuOpen}
-                          onClick={() => setIsAttachmentMenuOpen(open => !open)}
-                        >
-                          <Plus className="size-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs">
-                        Add
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  {isAttachmentMenuOpen && (
-                    <div className="absolute left-0 top-full z-50 mt-2 w-52 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-                      <button
-                        type="button"
-                        className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
-                        onClick={() => {
-                          setIsAttachmentMenuOpen(false)
-                          fileInputRef.current?.click()
-                        }}
-                      >
-                        <Paperclip className="size-4" />
-                        Upload file
-                      </button>
-                      <button
-                        type="button"
-                        className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
-                        onClick={openLibraryPicker}
-                      >
-                        <LibraryIcon className="size-4" />
-                        Add from library
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-              <SearchModeSelector
-                isAdaptiveAuthRequired={isAdaptiveAuthRequired}
-                onAdaptiveAuthRequired={onAdaptiveModeAuthRequired}
-              />
-            </>
-          }
-          modelSlot={
-            !isCloudDeployment && modelSelectorData ? (
-              <ModelSelectorClient data={modelSelectorData} />
-            ) : undefined
-          }
-          newChatButton={
-            messages.length > 0 ? (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNewChat}
-                className="shrink-0 size-8 md:size-10 rounded-full border-border/60 bg-transparent shadow-none group"
-                type="button"
-                disabled={isLoading}
-              >
-                <MessageCirclePlus className="size-4 transition-transform duration-[140ms] ease-[var(--motion-ease-out)] group-hover:rotate-12" />
-              </Button>
-            ) : undefined
-          }
-          submitButton={
-            <Button
-              type={isLoading ? 'button' : 'submit'}
-              size={'icon'}
-              className={cn(
-                isLoading && 'animate-pulse',
-                'size-8 md:size-10 rounded-full bg-white text-primary shadow-sm hover:bg-white/90',
-                isLoading && 'bg-primary text-primary-foreground'
-              )}
-              disabled={
-                (!hasPendingInput && !isLoading) || !hasAvailableModels
-              }
-              onClick={isLoading ? stop : undefined}
-              title={
-                hasAvailableModels
-                  ? undefined
-                  : 'No enabled model is available'
-              }
-            >
-              {isLoading ? (
-                <Square className="size-4 md:size-5" />
-              ) : (
-                <ArrowUp className="size-4 md:size-5" />
-              )}
-            </Button>
-          }
-          actionPills={
-            messages.length === 0 ? (
-              <ActionSuggestions
-                        onSelectPrompt={message => {
-                          handleInputChange({
-                            target: { value: message }
-                          } as React.ChangeEvent<HTMLTextAreaElement>)
-                          setTimeout(() => {
-                            inputRef.current?.form?.requestSubmit()
-                            setIsInputFocused(false)
-                            inputRef.current?.blur()
-                          }, INPUT_UPDATE_DELAY_MS)
-                        }}
-                        onCategoryClick={category => {
-                          handleInputChange({
-                            target: { value: category }
-                          } as React.ChangeEvent<HTMLTextAreaElement>)
-                          inputRef.current?.focus()
-                        }}
-                      />
-            ) : undefined
-          }
-          onBrowseFiles={() => fileInputRef.current?.click()}
-          onAttach={() => setIsAttachmentMenuOpen(open => !open)}
-          onLibrary={openLibraryPicker}
-          onFileDrop={files => void uploadSelectedFiles(files)}
-          onVoiceNote={handleVoiceNote}
-          hasPendingInput={hasPendingInput}
-          isLoading={isLoading}
+          onSubmit={async (value, meta) => {
+            handleInputChange({
+              target: { value }
+            } as React.ChangeEvent<HTMLTextAreaElement>)
+            if (meta.attachments.length > 0 && !isGuest) {
+              await uploadSelectedFiles(meta.attachments)
+            }
+            requestAnimationFrame(() => promptFormRef.current?.requestSubmit())
+          }}
+          models={['GPT 5.5', 'Opus 4.8', 'Gemini 3.5 Flash', 'Composer 2.5', 'GLM 5.2']}
+          onPlusClick={() => {
+            if (!isGuest) setIsAttachmentMenuOpen(open => !open)
+          }}
         />
       </form>
       <LibraryPickerDialog
