@@ -17,6 +17,7 @@ import { Button } from './ui/button'
 import { FeedbackModal } from './feedback-modal'
 // import { Button } from './ui/button' // No longer needed directly here for Sign In button
 import GuestMenu from './guest-menu' // Import the new GuestMenu component
+import { ModelSelectorClient } from './model-selector-client'
 import UserMenu from './user-menu'
 
 interface HeaderProps {
@@ -39,8 +40,9 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
           'w-full'
         )}
       >
-        {/* This div can be used for a logo or title on the left if needed */}
-        <div></div>
+        <div className="flex items-center gap-2">
+          <ModelSelectorClient variant="header" />
+        </div>
 
         <div className="flex items-center gap-2">
           {isRootPage && (

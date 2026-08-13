@@ -61,6 +61,7 @@ function ProviderLogo({ providerId }: { providerId: string }) {
 interface ModelSelectorClientProps {
   data?: ModelSelectorData
   className?: string
+  variant?: 'card' | 'header'
 }
 
 const FALLBACK_MODELS = [
@@ -71,7 +72,7 @@ const FALLBACK_MODELS = [
   { providerId: 'openai-compatible', id: 'glm-5.2', name: 'GLM 5.2' }
 ]
 
-function FallbackModelSelector({ className }: { className?: string }) {
+function FallbackModelSelector({ className, variant = 'card' }: { className?: string; variant?: 'card' | 'header' }) {
   const [open, setOpen] = useState(false)
   const [selectedModel, setSelectedModel] = useState(FALLBACK_MODELS[0])
 
@@ -82,11 +83,16 @@ function FallbackModelSelector({ className }: { className?: string }) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('h-auto min-w-[220px] justify-between gap-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-sm hover:bg-muted', className)}
+          className={cn(
+            variant === 'header'
+              ? 'h-auto gap-1 rounded-md border-0 bg-transparent px-1.5 py-1 text-sm font-medium shadow-none hover:bg-muted'
+              : 'h-auto min-w-[220px] justify-between gap-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-sm hover:bg-muted',
+            className
+          )}
         >
           <span className="flex items-center gap-2">
-            <ProviderLogo providerId={selectedModel.providerId} />
-            <span className="text-sm font-semibold">{selectedModel.name}</span>
+            {variant !== 'header' && <ProviderLogo providerId={selectedModel.providerId} />}
+            <span className={cn('text-sm', variant === 'header' ? 'font-medium' : 'font-semibold')}>{selectedModel.name}</span>
           </span>
           <ChevronDown className={cn('size-4 opacity-50 transition-transform', open && 'rotate-180')} />
         </Button>
@@ -121,7 +127,7 @@ function FallbackModelSelector({ className }: { className?: string }) {
   )
 }
 
-function DataModelSelector({ data, className }: { data: ModelSelectorData; className?: string }) {
+function DataModelSelector({ data, className, variant = 'card' }: { data: ModelSelectorData; className?: string; variant?: 'card' | 'header' }) {
   const [open, setOpen] = useState(false)
   const [selectedModelKey, setSelectedModelKey] = useState<string>(
     data.selectedModelKey
@@ -176,10 +182,15 @@ function DataModelSelector({ data, className }: { data: ModelSelectorData; class
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('h-auto gap-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-sm transition-[background-color,color,box-shadow,transform] hover:bg-muted', className)}
+          className={cn(
+            variant === 'header'
+              ? 'h-auto gap-1 rounded-md border-0 bg-transparent px-1.5 py-1 text-sm font-medium shadow-none hover:bg-muted'
+              : 'h-auto gap-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-sm transition-[background-color,color,box-shadow,transform] hover:bg-muted',
+            className
+          )}
         >
-          <ProviderLogo providerId={selectedModel.providerId} />
-          <span className="truncate max-w-52 text-sm font-semibold">
+          {variant !== 'header' && <ProviderLogo providerId={selectedModel.providerId} />}
+          <span className={cn('truncate max-w-52 text-sm', variant === 'header' ? 'font-medium' : 'font-semibold')}>
             {selectedModel.name}
           </span>
           <ChevronDown
@@ -242,11 +253,11 @@ function DataModelSelector({ data, className }: { data: ModelSelectorData; class
   )
 }
 
-export function ModelSelectorClient({ data, className }: ModelSelectorClientProps) {
+export function ModelSelectorClient({ data, className, variant = 'card' }: ModelSelectorClientProps) {
   if (!data || !data.enabled) {
-    return <FallbackModelSelector className={className} />
+    return <FallbackModelSelector className={className} variant={variant} />
   }
 
-  return <DataModelSelector data={data} className={className} />
+  return <DataModelSelector data={data} className={className} variant={variant} />
 }
 

@@ -34,18 +34,20 @@ export function ConnectionsMenu({ onManage }: { onManage?: () => void }) {
         <IconWorld className="size-[17px]" />
       </button>
       {open && (
-        <div className="absolute bottom-11 left-0 z-50 w-[300px] overflow-hidden rounded-2xl border border-border bg-card p-2 text-card-foreground shadow-2xl">
-          <div className="space-y-1">
+        <div className="absolute bottom-12 left-0 z-50 w-[360px] overflow-hidden rounded-3xl border border-border/80 bg-card p-3 text-card-foreground shadow-2xl ring-1 ring-foreground/5">
+          <div className="space-y-1 rounded-2xl bg-muted/20 p-1">
             {connectors.map(({ name, icon: Icon }) => (
               <button
                 key={name}
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex min-h-10 w-full items-center gap-3 rounded-xl px-2.5 text-left text-sm transition-colors hover:bg-muted"
+                className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors hover:bg-muted"
               >
-                <Icon className="size-4 shrink-0 text-muted-foreground" />
-                <span className="min-w-0 flex-1 truncate">{name}</span>
-                <span className="shrink-0 text-sm text-muted-foreground">Connect</span>
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background/70">
+                  <Icon className="size-4 text-muted-foreground" />
+                </span>
+                <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
+                <span className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold text-foreground/70 transition-colors hover:bg-background hover:text-foreground">Connect</span>
               </button>
             ))}
           </div>
@@ -56,7 +58,7 @@ export function ConnectionsMenu({ onManage }: { onManage?: () => void }) {
             type="button"
             onClick={() => setBrowserEnabled(value => !value)}
             className={cn(
-              'flex min-h-10 w-full items-center gap-3 rounded-xl px-2.5 text-left text-sm transition-colors',
+              'flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm transition-colors',
               browserEnabled ? 'bg-emerald-500/10' : 'hover:bg-muted'
             )}
           >
@@ -68,12 +70,12 @@ export function ConnectionsMenu({ onManage }: { onManage?: () => void }) {
           </button>
 
           <div className="my-2 border-t border-border" />
-          <button type="button" onClick={() => setOpen(false)} className="flex min-h-10 w-full items-center gap-3 rounded-xl px-2.5 text-left text-sm hover:bg-muted">
+          <button type="button" onClick={() => setOpen(false)} className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm hover:bg-muted">
             <IconCirclePlus className="size-4 text-muted-foreground" />
             <span className="flex-1">Add connectors</span>
             <span className="text-xs text-muted-foreground">+41</span>
           </button>
-          <button type="button" onClick={() => { onManage?.(); setOpen(false) }} className="flex min-h-10 w-full items-center gap-3 rounded-xl px-2.5 text-left text-sm hover:bg-muted">
+          <button type="button" onClick={() => { onManage?.(); setOpen(false) }} className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm hover:bg-muted">
             <IconAdjustmentsHorizontal className="size-4 text-muted-foreground" />
             <span className="flex-1">Manage connectors</span>
             <IconChevronRight className="size-4 text-muted-foreground" />

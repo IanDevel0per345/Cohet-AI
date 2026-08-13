@@ -604,12 +604,6 @@ export function ChatPanel({
           </div>
         )}
 
-        <div className="mb-3 flex w-full justify-center">
-          <ModelSelectorClient
-            data={modelSelectorData}
-            className="min-w-[220px] justify-between"
-          />
-        </div>
         <PromptInput
           className={cn(
             'relative mx-auto',
