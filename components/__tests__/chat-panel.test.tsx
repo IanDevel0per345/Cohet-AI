@@ -15,8 +15,8 @@ vi.mock('../artifact/artifact-context', () => ({
   useArtifact: () => ({ close: vi.fn() })
 }))
 
-vi.mock('../action-buttons', () => ({
-  ActionButtons: () => null
+vi.mock('../chat/action-suggestions', () => ({
+  ActionSuggestions: () => null
 }))
 
 vi.mock('../library/library-context', () => ({

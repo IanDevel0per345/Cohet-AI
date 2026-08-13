@@ -33,11 +33,8 @@ import { cn } from '@/lib/utils'
 import { getCookie } from '@/lib/utils/cookies'
 import { getTextFromParts } from '@/lib/utils/message-utils'
 
-import { useFileDropzone } from '@/hooks/use-file-dropzone'
-
 import { ChatMessages } from './chat-messages'
 import { ChatPanel } from './chat-panel'
-import { DragOverlay } from './drag-overlay'
 import { ErrorModal } from './error-modal'
 
 // Define section structure
@@ -508,28 +505,8 @@ export function Chat({
     }
   }
 
-  const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
-    useFileDropzone({
-      uploadedFiles,
-      setUploadedFiles,
-      chatId: chatId
-    })
-  const guestDragHandlers = {
-    isDragging: false,
-    handleDragOver: (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-    },
-    handleDragLeave: (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-    },
-    handleDrop: (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-    }
-  }
-  const dragHandlers = isGuest
-    ? guestDragHandlers
-    : { isDragging, handleDragOver, handleDragLeave, handleDrop }
-
+  // Drag & drop está centralizado no RedesignedInput do chat-panel
+  // (listeners document-level com área de drop tracejada embutida no card).
   return (
     <ChatProvider sendMessage={safeSendMessage} isStreamingRef={isStreamingRef}>
       <div
@@ -538,9 +515,6 @@ export function Chat({
           messages.length === 0 ? 'items-center justify-center' : ''
         )}
         data-testid="full-chat"
-        onDragOver={dragHandlers.handleDragOver}
-        onDragLeave={dragHandlers.handleDragLeave}
-        onDrop={dragHandlers.handleDrop}
       >
         <ChatMessages
           sections={sections}
@@ -619,7 +593,6 @@ export function Chat({
           modelSelectorData={modelSelectorData}
           sections={sections}
         />
-        <DragOverlay visible={dragHandlers.isDragging} />
         <ErrorModal
           open={errorModal.open}
           onOpenChange={open => setErrorModal(prev => ({ ...prev, open }))}
