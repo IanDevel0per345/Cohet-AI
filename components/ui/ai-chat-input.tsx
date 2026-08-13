@@ -5,9 +5,6 @@ import { useCallback,useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { ConnectionsMenu } from "./connections-menu";
-import { IconScoutIcon } from "./iconscout-icon";
-
 // ----------------------------------------------------------------------
 // Transition Physics
 // ----------------------------------------------------------------------
@@ -80,7 +77,11 @@ function ModelIcon({ model, className }: { model: string; className?: string }) 
 }
 
 function ArrowUpIcon() {
-  return <IconScoutIcon name="new" className="size-4 brightness-0 invert" />;
+  return (
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M7 12V2M7 2L2.5 6.5M7 2L11.5 6.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 function MicIcon() {
@@ -101,11 +102,19 @@ function StopIcon() {
 }
 
 function PlusIcon() {
-  return <IconScoutIcon name="add" className="size-[18px]" />;
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M7 2.5V11.5M2.5 7H11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 function CloseIcon() {
-  return <IconScoutIcon name="close" className="size-3" />;
+  return (
+    <svg width="9" height="9" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M2.5 2.5L11.5 11.5M11.5 2.5L2.5 11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 function DynamicBarsIcon({ level }: { level: string }) {
@@ -293,7 +302,6 @@ export interface PromptInputProps {
   placeholder?: string;
   className?: string;
   models?: string[];
-  model?: string;
   efforts?: string[];
   defaultValue?: string;
   value?: string;
@@ -310,7 +318,6 @@ export const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
       placeholder = "Ask anything",
       className,
       models = ["GPT 5.5", "Opus 4.8", "Gemini 3.5 Flash", "Composer 2.5", "GLM 5.2"],
-      model,
       efforts = ["Low", "Medium", "Max Effort"],
       defaultValue = "",
       value: controlledValue,
@@ -324,7 +331,9 @@ export const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
     const [expanded, setExpanded] = useState(false);
     const [isSmoothResize, setIsSmoothResize] = useState(false);
     const [localValue, setLocalValue] = useState(defaultValue);
-    const activeModel = model ?? models[0];
+    const [selectedModel, setSelectedModel] = useState(models[0]);
+    const [effortIndex, setEffortIndex] = useState(1);
+    const [isModelSelectOpen, setIsModelSelectOpen] = useState(false);
 
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [activeAttachment, setActiveAttachment] = useState<{ attachment: Attachment; rect: DOMRect } | null>(null);
@@ -549,8 +558,6 @@ export const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
     }, [stopRecording, attachments]);
 
 
-    // This effect intentionally synchronizes the expanded visual state with controlled input content.
-     
     useEffect(() => {
       if ((value.trim() !== "" || hasAttachments) && !expanded) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -596,30 +603,46 @@ export const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
        
     }, [value, expanded]); 
 
-    // The container height mirrors the measured textarea height for the spring animation.
-     
     useEffect(() => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setContainerHeight(Math.max(116, textareaHeight + 48));
       setTimeout(updateFades, 0);
     }, [textareaHeight]);
 
+    useEffect(() => {
+      if (!isModelSelectOpen) return;
+      const handleOutsideClick = (e: MouseEvent) => {
+        if (internalContainerRef.current && !internalContainerRef.current.contains(e.target as Node)) {
+          setIsModelSelectOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => document.removeEventListener("mousedown", handleOutsideClick);
+    }, [isModelSelectOpen]);
+
     const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
       if (internalContainerRef.current && internalContainerRef.current.contains(e.relatedTarget as Node)) return;
       if (value.trim() === "" && !hasAttachments && !isRecording) {
         setIsSmoothResize(false);
         setExpanded(false);
+        setIsModelSelectOpen(false);
       }
     };
 
     const handleSubmit = () => {
       if (value.trim() === "" && !hasAttachments) return;
       setIsSmoothResize(false);
-      onSubmit?.(value, { model: activeModel, effort: efforts[0], attachments: attachments.map((a) => a.file) });
+      onSubmit?.(value, { model: selectedModel, effort: efforts[effortIndex], attachments: attachments.map((a) => a.file) });
       handleValueChange("");
       attachments.forEach((a) => URL.revokeObjectURL(a.url));
       setAttachments([]);
       setExpanded(false);
+      setIsModelSelectOpen(false);
+    };
+
+    const cycleEffort = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setEffortIndex((prev) => (prev + 1) % efforts.length);
     };
 
     const openFileChooser = (e: React.MouseEvent) => {
@@ -789,7 +812,8 @@ export const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
                 if (e.key === "Escape" && value.trim() === "" && !hasAttachments) {
                   setIsSmoothResize(false);
                   setExpanded(false);
-                          }
+                  setIsModelSelectOpen(false);
+                }
               }}
               placeholder={placeholder}
               aria-label="Prompt"
@@ -834,24 +858,88 @@ export const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
               {placeholder}
             </button>
 
-            {/* Traditional left controls: add files and manage connections. */}
+            {/* Bottom Actions Wrapper - Hides when recording to make space for visualizer */}
             <div
               className={cn(
-                "absolute bottom-2 left-3 z-[10] flex items-center gap-1 transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]",
+                "absolute bottom-2 left-3 right-12 z-[10] flex items-center gap-0 transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]",
                 expanded && !isRecording ? "opacity-100 blur-0 translate-y-0 pointer-events-auto" : "opacity-0 blur-sm translate-y-2 pointer-events-none"
               )}
             >
+              <div className="relative">
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsModelSelectOpen((prev) => !prev);
+                  }}
+                  className={cn(
+                    "group flex items-center gap-1 rounded-full px-2 py-1 text-foreground/50 transition-all duration-200 outline-none hover:bg-accent/60 hover:text-foreground cursor-default",
+                    isModelSelectOpen ? "bg-accent/60 text-foreground" : ""
+                  )}
+                  aria-label={`Select model. Current: ${selectedModel}`}
+                >
+                  <ModelIcon model={selectedModel} className="size-3.5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-xs font-semibold select-none transition-colors">
+                    <MorphingText text={selectedModel} />
+                  </span>
+                </button>
+
+                <div
+                  style={{ transformOrigin: "bottom left" }}
+                  onMouseLeave={() => {
+                    setHoverStyle((prev) => ({
+                      ...prev, opacity: 0, transform: prev.transform.replace("scale(1)", "scale(0.95)"), transition: "opacity 0.2s ease-in, transform 0.2s ease-out",
+                    }));
+                  }}
+                  className={cn(
+                    "absolute bottom-full left-0 mb-2.5 z-50 w-44 rounded-2xl border border-border bg-card/95 p-1 shadow-xl backdrop-blur-md flex flex-col gap-0.5 transition-all duration-400 cursor-default",
+                    isModelSelectOpen
+                      ? "opacity-100 scale-100 translate-y-0 pointer-events-auto ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                      : "opacity-0 scale-95 translate-y-3 pointer-events-none ease-[cubic-bezier(0.175,0.885,0.32,1.275)]"
+                  )}
+                >
+                  <div className="relative flex flex-col gap-0.5">
+                    <div style={hoverStyle} className="absolute left-0 right-0 top-0 h-8 -z-10 rounded-xl bg-accent pointer-events-none" />
+                    {models.map((model, idx) => (
+                      <button
+                        key={model}
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onMouseEnter={() => {
+                          setHoverStyle((prev) => ({
+                            opacity: 1, transform: `translateY(${idx * 34}px) scale(1)`,
+                            transition: prev.opacity === 0 ? "opacity 0.15s ease-out" : "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease", 
+                          }));
+                        }}
+                        onClick={(e) => { e.stopPropagation();                         setSelectedModel(model); onModelChange?.(model); setIsModelSelectOpen(false); }}
+
+                        className="group relative flex h-8 w-full items-center justify-between rounded-xl px-2.5 py-1.5 text-left text-xs font-medium text-foreground/80 outline-none active:scale-[0.98] cursor-default"
+                      >
+                        <span className="flex items-center gap-2">
+                          <ModelIcon model={model} className="size-3.5 opacity-85 group-hover:opacity-100 transition-opacity" />
+                          {model}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={openFileChooser}
-                disabled={attachments.length >= maxAttachments}
-                aria-label="Add attachment"
-                className="flex size-8 items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:pointer-events-none"
+                type="button" onMouseDown={(e) => e.preventDefault()} onClick={cycleEffort}
+                className="group flex items-center gap-1 rounded-full px-2 py-1 text-foreground/50 transition-all duration-200 hover:bg-accent/60 hover:text-foreground outline-none cursor-default"
+              >
+                <DynamicBarsIcon level={efforts[effortIndex]} />
+                <span className="text-xs font-semibold select-none transition-colors"><MorphingText text={efforts[effortIndex]} /></span>
+              </button>
+
+              <button
+                type="button" onMouseDown={(e) => e.preventDefault()} onClick={openFileChooser} disabled={attachments.length >= maxAttachments}
+                className="ml-auto flex size-7 items-center justify-center rounded-full text-foreground/50 transition-all duration-200 hover:bg-accent/60 hover:text-foreground outline-none cursor-default disabled:opacity-40 disabled:pointer-events-none"
               >
                 <PlusIcon />
               </button>
-              <ConnectionsMenu />
             </div>
 
             {/* Audio Wave Visualizer Overlay positioned precisely to the left of the mic button */}

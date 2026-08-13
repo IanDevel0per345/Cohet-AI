@@ -47,7 +47,6 @@ import {
   TooltipTrigger
 } from './ui/tooltip'
 import { MessageNavigationDots } from './message-navigation-dots'
-import { ModelSelectorClient } from './model-selector-client'
 import { SearchModeSelector } from './search-mode-selector'
 import { UploadedFileList } from './uploaded-file-list'
 
@@ -626,7 +625,6 @@ export function ChatPanel({
             }
             requestAnimationFrame(() => promptFormRef.current?.requestSubmit())
           }}
-          model={modelSelectorData?.selectedModelKey?.split(':').pop() ?? 'GPT 5.5'}
           onPlusClick={() => {
             if (!isGuest) setIsAttachmentMenuOpen(open => !open)
           }}

@@ -17,7 +17,6 @@ import { Button } from './ui/button'
 import { FeedbackModal } from './feedback-modal'
 // import { Button } from './ui/button' // No longer needed directly here for Sign In button
 import GuestMenu from './guest-menu' // Import the new GuestMenu component
-import { ModelSelectorClient } from './model-selector-client'
 import UserMenu from './user-menu'
 
 interface HeaderProps {
@@ -40,17 +39,6 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
           'w-full'
         )}
       >
-        <div
-          className={cn(
-            'ml-14 flex items-center gap-2 transition-[margin] duration-200 ease-linear',
-            open
-              ? 'md:ml-[calc(var(--sidebar-width)+0.5rem)]'
-              : 'md:ml-2'
-          )}
-        >
-          <ModelSelectorClient variant="header" />
-        </div>
-
         <div className="flex items-center gap-2">
           {isRootPage && (
             <Button
